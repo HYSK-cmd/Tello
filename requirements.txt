@@ -1,0 +1,7 @@
+djitellopy
+numpy
+opencv-python
+python-dotenv
+google-genai
+google-cloud-vision
+matplotlib
