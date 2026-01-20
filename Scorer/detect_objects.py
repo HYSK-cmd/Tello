@@ -1,7 +1,5 @@
-import os
-import io
+import os, io
 from google.cloud import vision
-import pandas as pd
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = 'google_cloud/vision_key.json'
 def vision_detect(image_path):
