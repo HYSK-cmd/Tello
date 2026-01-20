@@ -1,18 +1,17 @@
 import os, cv2, time, logging, argparse
 import concurrent.futures # create a background server for llm API
 import threading
-
+import pandas as pd
 from typing import Tuple, Optional
 from dotenv import load_dotenv
 from datetime import datetime
 
 from occupancy_map import OccupancyGrid, ValueMap
 from tello_wrapper import TelloWrapper
-#from google.cloud import vision
 from google import genai
 
 load_dotenv()
-
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = 'google_cloud/vision_key.json'
 api_key = os.environ.get("GENAI_API_KEY")
 client = genai.Client(api_key=api_key)
 
@@ -87,7 +86,7 @@ def capture_frame(tello: TelloWrapper):
     if not img_saved:
         logging.warning("IMAGE NOT SAVED")
         return None
-    return frame
+    return image_path
 
 def enable_agents() -> Tuple[Scorer, Selector]:
     score_agent = Scorer()

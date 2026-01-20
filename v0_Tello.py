@@ -11,7 +11,7 @@ class MyConfig:
     HEIGHT = 50
     CELL_SIZE = 0.1
 
-def test_spatial_memory(tello: TelloWrapper, wp: list, wp_record: list, occupancy_grid: OccupancyGrid, value_map: ValueMap):
+def test_spatial_memory(tello: TelloWrapper, wp_record: list, occupancy_grid: OccupancyGrid, value_map: ValueMap):
     try:
         # Get delta movement
         delta_pose = move_drone(tello, wp)
@@ -32,8 +32,6 @@ def test_spatial_memory(tello: TelloWrapper, wp: list, wp_record: list, occupanc
         print("Updating the map...")
         occupancy_grid.update_visited_in_occup_grid(new_pos, prev_pos)
         print_occup_map(occupancy_grid, prev_pos, new_pos)
-        
-        wp_record.append(new_pos)
         time.sleep(1)  # Wait after each command
         return True
     except TelloException as e:
@@ -78,8 +76,8 @@ def print_occup_map(occupancy_grid: OccupancyGrid, pose1, pose2):
     x_min, x_max = min(start[0], end[0]) - 5, max(start[0], end[0]) + 5
     y_min, y_max = min(start[1], end[1]) - 5, max(start[1], end[1]) + 5
     print(f"\nShowing region: rows {y_min}-{y_max}, cols {x_min}-{x_max}\n")
-    for row in occupancy_grid.grid[480:520+1]:
-        print(''.join(symbols.get(cell, '?') for cell in row[480:520+1]))
+    for row in occupancy_grid.grid[y_min:y_min+1]:
+        print(''.join(symbols.get(cell, '?') for cell in row[x_min:x_min+1]))
 
 def init_spatial_map() -> Tuple[OccupancyGrid, ValueMap]:
     occupancy_grid = OccupancyGrid(MyConfig.WIDTH, MyConfig.HEIGHT, MyConfig.CELL_SIZE)
@@ -92,7 +90,6 @@ def main():
     tello.connect()
     tello.start_stream()
     waypoints = [["move_forward", 25], ["turn_cw", 90], ["move_forward", 50], ["turn_cw", 90], ["move_forward", 35], ["turn_cw", 90], "move_forward", 15]
-    wp_record = [] 
     try:
         if input("run it? [y/n]") == 'y':
             tello.takeoff()
@@ -103,7 +100,7 @@ def main():
                         print("Battery too low, landing...")
                         break
                     if input("Next Waypoint?: [y/n]") == 'y':
-                        success = test_spatial_memory(tello, wp, wp_record, occupancy_grid, value_map)
+                        success = test_spatial_memory(tello, wp, occupancy_grid, value_map)
                         if not success:
                             print("Waypoint failed, stopping...")
                             break
